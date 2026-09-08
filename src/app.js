@@ -3,6 +3,8 @@ import cors from "cors";
 import morgan from "morgan";
 import "express-async-errors";
 
+import { errorHandler } from "./middlewares/error.middleware.js";
+
 const app = express();
 
 app.use(cors());
@@ -25,12 +27,6 @@ app.get("*", (req, res) => {
 });
 
 //global error handler as very last middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    status: "error",
-    message: err.message || "Internal Server Error",
-  });
-});
+app.use(errorHandler);
 
 export default app;
