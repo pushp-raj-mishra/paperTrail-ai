@@ -1,4 +1,3 @@
-import { query_timeout } from "pg/lib/defaults";
 import { ZodError } from "zod";
 
 export const validate = (schema) => (req, res, next) => {
