@@ -28,4 +28,12 @@ export class DocumentRepository {
       .returning({ id: documents.id });
     return result[0] || null;
   }
+
+  static async create(userId, filename) {
+    const result = await db
+      .insert(documents)
+      .values({ userId, filename, status: "PENDING" })
+      .returning();
+    return result[0];
+  }
 }

@@ -1,4 +1,5 @@
 import { DocumentRepository } from "../repositories/document.repo.js";
+import { StorageService } from "../services/storage.service.js";
 
 export const getDocuments = async (req, res) => {
   const docs = await DocumentRepository.findAllByUser(req.user.id);
@@ -42,5 +43,35 @@ export const deleteDocument = async (req, res) => {
   res.status(200).json({
     status: "success",
     message: `Document ${id} successfully deleted`,
+  });
+};
+
+export const uploadDocument = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({
+      status: "error",
+      message: "No PDF file provided",
+    });
+  }
+
+  const fileKey = await StorageService.save(
+    req.file.buffer,
+    req.file.originalname,
+  );
+  const newDoc = await DocumentRepository.create(
+    req.user.id,
+    req.file.originalname,
+  );
+
+  //in future here we have to add a job to bullMQ
+
+  res.status(202).json({
+    status: "success",
+    message: "Document uploaded successfully and pending processing",
+    data: {
+      id: newDoc.id,
+      filename: newDoc.filename,
+      status: newDoc.status,
+    },
   });
 };
