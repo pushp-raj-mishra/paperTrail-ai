@@ -2,6 +2,10 @@ import { Worker } from "bullmq";
 import Redis from "ioredis";
 import { extractText, getDocumentProxy } from "unpdf";
 import { StorageService } from "../services/storage.service.js";
+import { ChunkerService } from "../services/chunker.service.js";
+import { EmbeddingService } from "../services/embedding.service.js";
+import { db } from "../config/db.config.js";
+import { documentChunks } from "../db/schema.js";
 import { DocumentRepository } from "../repositories/document.repo.js";
 import dotenv from "dotenv";
 
@@ -30,7 +34,22 @@ const worker = new Worker(
         `[Job ${job.id}] Successfully extracted ${rawText.length} characters.`,
       );
 
-      //here we have to chunk this text and generate OPENAI embeddings
+      console.log(`[Job ${job.id}] Chunking text...`);
+      const chunks = ChunkerService.chunkText(rawText);
+
+      console.log(
+        `[Job ${job.id}] Generating embeddings for ${chunks.length} chunks...`,
+      );
+      const embeddings = await EmbeddingService.generateEmbeddings(chunks);
+
+      console.log(`[Job ${job.id}] Saving to PostgreSQL...`);
+      const recordsToInsert = chunks.map((chunk, index) => ({
+        documentId,
+        content: chunk,
+        embedding: embeddings[index],
+      }));
+
+      await db.insert(documentChunks).values(recordsToInsert);
 
       await StorageService.delete(fileKey);
       await DocumentRepository.updateStatus(documentId, "COMPLETED");
