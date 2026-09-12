@@ -1,5 +1,6 @@
 import { DocumentRepository } from "../repositories/document.repo.js";
 import { StorageService } from "../services/storage.service.js";
+import { ingestionQueue } from "../jobs/queue.js";
 
 export const getDocuments = async (req, res) => {
   const docs = await DocumentRepository.findAllByUser(req.user.id);
@@ -63,11 +64,15 @@ export const uploadDocument = async (req, res) => {
     req.file.originalname,
   );
 
-  //in future here we have to add a job to bullMQ
+  await ingestionQueue.add("process-pdf", {
+    documentId: newDoc.id,
+    userId: req.user.id,
+    fileKey: fileKey,
+  });
 
   res.status(202).json({
     status: "success",
-    message: "Document uploaded successfully and pending processing",
+    message: "Document uploaded successfully and is queued for AI processing",
     data: {
       id: newDoc.id,
       filename: newDoc.filename,

@@ -5,7 +5,7 @@ export const errorHandler = (err, req, res, next) => {
 
   res.status(statusCode).json({
     status: "error",
-    message: error.message || "Internal Server Error",
+    message: err.message || "Internal Server Error",
     //if we are in development mode, then we also want stack trace
     ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
   });
