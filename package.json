@@ -23,9 +23,9 @@
     "ioredis": "^6.0.0",
     "morgan": "^1.12.0",
     "multer": "^2.3.0",
-    "pdf-parse": "^2.4.5",
     "pg": "^8.23.0",
     "postgres": "^3.4.9",
+    "unpdf": "^1.7.0",
     "zod": "^4.5.4"
   },
   "devDependencies": {

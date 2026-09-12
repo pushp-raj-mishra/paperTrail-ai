@@ -17,4 +17,12 @@ export class StorageService {
     //returning filepath for worker
     return uploadPath;
   }
+
+  static async retrieve(fileKey) {
+    return await fs.readFile(fileKey);
+  }
+
+  static async delete(fileKey) {
+    return await fs.unlink(fileKey).catch(() => null);
+  }
 }

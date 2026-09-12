@@ -36,4 +36,14 @@ export class DocumentRepository {
       .returning();
     return result[0];
   }
+
+  static async updateStatus(id, status) {
+    const result = await db
+      .update(documents)
+      .set({ status })
+      .where(eq(documents.id, id))
+      .returning();
+
+    return result[0];
+  }
 }
