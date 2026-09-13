@@ -1,6 +1,9 @@
 import { DocumentRepository } from "../repositories/document.repo.js";
 import { StorageService } from "../services/storage.service.js";
 import { ingestionQueue } from "../jobs/queue.js";
+import { RAGRepository } from "../repositories/rag.repo.js";
+import { EmbeddingService } from "../services/embedding.service.js";
+import { LLMService } from "../services/llm.service.js";
 
 export const getDocuments = async (req, res) => {
   const docs = await DocumentRepository.findAllByUser(req.user.id);
@@ -77,6 +80,47 @@ export const uploadDocument = async (req, res) => {
       id: newDoc.id,
       filename: newDoc.filename,
       status: newDoc.status,
+    },
+  });
+};
+
+export const askQuestion = async (req, res) => {
+  const { query } = req.body;
+
+  if (!query) {
+    return res
+      .status(400)
+      .json({ status: "error", message: "A search query is required." });
+  }
+
+  const queryVector = await EmbeddingService.embedQuery(query);
+
+  const relevantChunks = await RAGRepository.findSimilarChunks(
+    queryVector,
+    req.user.id,
+  );
+
+  if (relevantChunks.length === 0) {
+    return res.status(200).json({
+      status: "success",
+      data: {
+        answer:
+          "I couldn't find any documents to search through. Please upload a PDF first!",
+        sources: [],
+      },
+    });
+  }
+
+  const answer = await LLMService.answerQuestion(query, relevantChunks);
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      answer,
+      sources: relevantChunks.map((chunk) => ({
+        filename: chunk.filename,
+        similarityScore: chunk.similarity.toFixed(3),
+      })),
     },
   });
 };
