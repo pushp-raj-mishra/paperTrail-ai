@@ -6,11 +6,16 @@ import "express-async-errors";
 import { errorHandler } from "./middlewares/error.middleware.js";
 import documentRoutes from "./routes/document.js";
 
+import swaggerUi from "swagger-ui-express";
+import { swaggerDocument } from "./config/swagger.config.js";
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/api/v1/documents", documentRoutes);
 

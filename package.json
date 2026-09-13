@@ -26,6 +26,7 @@
     "multer": "^2.3.0",
     "pg": "^8.23.0",
     "postgres": "^3.4.9",
+    "swagger-ui-express": "^5.0.1",
     "unpdf": "^1.7.0",
     "zod": "^4.5.4"
   },
