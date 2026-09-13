@@ -1,7 +1,6 @@
 version: "3.8"
 
 services:
-  ## pgsql with pgvector
   db:
     image: pgvector/pgvector:pg16
     container_name: papertrail_postgres
@@ -14,13 +13,13 @@ services:
       - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./src/db/migrations/0000_glamorous_betty_ross.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U admin -d papertrail_db"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  ## redis for bullmq
   redis:
     image: redis:7-alpine
     container_name: papertrail_redis
@@ -36,6 +35,40 @@ services:
       timeout: 3s
       retries: 5
 
+  api:
+    build: .
+    container_name: papertrail_api
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgres://admin:rootpassword@db:5432/papertrail_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build: .
+    container_name: papertrail_worker
+    restart: always
+    command: ["node", "src/jobs/worker.js"]
+    environment:
+      DATABASE_URL: postgres://admin:rootpassword@db:5432/papertrail_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
 volumes:
-  pgdata: # this is my persistent volume for PostgreSQL database
-  redisdata: # this is my persistent volume for Redis queue data
+  pgdata:
+  redisdata:
