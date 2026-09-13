@@ -5,6 +5,7 @@ import {
   getDocumentById,
   deleteDocument,
   uploadDocument,
+  askQuestion,
 } from "../controllers/document.controller.js";
 import { requireAuth } from "../middlewares/auth.middleware.js";
 import { validate } from "../middlewares/validate.middleware.js";
@@ -26,5 +27,6 @@ router.get("/", getDocuments);
 router.get("/:id", validate(documentIdSchema), getDocumentById);
 
 router.delete("/:id", validate(documentIdSchema), deleteDocument);
+router.post("/ask", askQuestion);
 
 export default router;
