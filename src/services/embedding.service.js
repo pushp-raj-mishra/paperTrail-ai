@@ -23,4 +23,18 @@ export class EmbeddingService {
     });
     return response.embeddings.map((embedding) => embedding.values);
   }
+
+  static async embedQuery(query) {
+    console.log(`[Gemini]: Embedding Search Query`);
+
+    const response = await ai.models.embedContent({
+      model: "gemini-embedding-2",
+      contents: `task: question answering | query: ${query}`,
+      config: {
+        outputDimensionality: 1536,
+      },
+    });
+
+    return response.embeddings.map((embedding) => embedding.values);
+  }
 }
