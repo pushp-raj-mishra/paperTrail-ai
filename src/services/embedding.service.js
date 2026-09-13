@@ -35,6 +35,6 @@ export class EmbeddingService {
       },
     });
 
-    return response.embeddings.map((embedding) => embedding.values);
+    return response.embeddings[0].values;
   }
 }
