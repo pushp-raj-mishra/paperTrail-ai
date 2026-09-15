@@ -12,3 +12,12 @@ const queryClient = postgres(process.env.DATABASE_URL, {
 });
 
 export const db = drizzle(queryClient, { schema });
+
+queryClient`SELECT 1`
+  .then(() => {
+    console.log("DATABASE CONNECTED SUCCESSFULLY!");
+  })
+  .catch((err) => {
+    console.error("CRITICAL DATABASE ERROR:");
+    console.error(err);
+  });
