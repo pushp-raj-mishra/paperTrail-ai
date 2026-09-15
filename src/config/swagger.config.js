@@ -8,6 +8,10 @@ export const swaggerDocument = {
   },
   servers: [
     {
+      url: "https://papertrail-ai-d1pu.onrender.com",
+      description: "Production Server",
+    },
+    {
       url: "http://localhost:3000",
       description: "Local Development Server",
     },
