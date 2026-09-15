@@ -8,7 +8,7 @@ dotenv.config();
 // i am creaating connection pool and initializing drizzle with schema
 const queryClient = postgres(process.env.DATABASE_URL, {
   prepare: false,
-  ssl: required,
+  ssl: "require",
 });
 
 export const db = drizzle(queryClient, { schema });
